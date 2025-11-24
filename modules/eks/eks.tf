@@ -1,6 +1,3 @@
-# -------------------------------
-# EKS Cluster IAM Role
-# -------------------------------
 resource "aws_iam_role" "eks_cluster_role" {
   name = "${var.eks_cluster_name}-cluster-role"
 
@@ -19,9 +16,6 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_attach" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# -------------------------------
-# EKS Cluster
-# -------------------------------
 resource "aws_eks_cluster" "my_cluster" {
   name     = var.eks_cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
@@ -36,9 +30,6 @@ resource "aws_eks_cluster" "my_cluster" {
   ]
 }
 
-# -------------------------------
-# Node Group IAM Role
-# -------------------------------
 resource "aws_iam_role" "node_group_role" {
   name = "${var.eks_cluster_name}-nodegroup-role"
   assume_role_policy = jsonencode({
@@ -87,9 +78,6 @@ resource "aws_eks_node_group" "this" {
   ]
 }
 
-# -------------------------------
-# OIDC Provider for IRSA
-# -------------------------------
 data "tls_certificate" "eks_oidc" {
   url = aws_eks_cluster.my_cluster.identity[0].oidc[0].issuer
 }
@@ -100,9 +88,6 @@ resource "aws_iam_openid_connect_provider" "oidc" {
   url             = aws_eks_cluster.my_cluster.identity[0].oidc[0].issuer
 }
 
-# -------------------------------
-# EBS CSI Driver IAM Role
-# -------------------------------
 resource "aws_iam_role" "ebs_csi" {
   name = "${var.eks_cluster_name}-ebs-csi"
 
@@ -159,9 +144,6 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
   policy_arn = aws_iam_policy.ebs_csi.arn
 }
 
-# -------------------------------
-# Kubernetes Service Account for EBS CSI
-# -------------------------------
 resource "kubernetes_service_account" "ebs_csi_sa" {
   metadata {
     name      = "ebs-csi-controller-sa"
@@ -176,9 +158,6 @@ resource "kubernetes_service_account" "ebs_csi_sa" {
   ]
 }
 
-# -------------------------------
-# EKS Add-on for EBS CSI
-# -------------------------------
 resource "aws_eks_addon" "ebs_csi" {
   cluster_name             = var.eks_cluster_name
   addon_name               = "aws-ebs-csi-driver"
@@ -190,9 +169,6 @@ resource "aws_eks_addon" "ebs_csi" {
   ]
 }
 
-# -------------------------------
-# ALB Controller IAM Role & Service Account
-# -------------------------------
 resource "aws_iam_role" "alb_controller" {
   name = "alb-controller-${replace(replace(replace(replace(timestamp(), "-", ""), ":", ""), "T", ""), "Z", "")}"
   assume_role_policy = jsonencode({

@@ -15,7 +15,6 @@ terraform {
   }
 }
 
-
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -25,7 +24,6 @@ provider "kubernetes" {
     args        = ["eks", "get-token", "--cluster-name", var.eks_cluster_name]
   }
 }
-
 
 provider "helm" {
   kubernetes {
