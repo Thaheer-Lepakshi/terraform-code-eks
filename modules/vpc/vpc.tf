@@ -1,4 +1,3 @@
-
 resource "aws_vpc" "my-vpc" {
   cidr_block           = var.vpc_cidr_block
   instance_tenancy     = "default"
@@ -9,9 +8,11 @@ resource "aws_vpc" "my-vpc" {
     Name = "My-VPC"
   }
 }
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
 resource "aws_subnet" "public_subnet" {
   count                   = length(var.public_cidr_block)
   vpc_id                  = aws_vpc.my-vpc.id
@@ -26,7 +27,6 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-
 resource "aws_subnet" "private_subnet" {
   count             = length(var.private_cidr_block)
   vpc_id            = aws_vpc.my-vpc.id
@@ -40,14 +40,12 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-
 resource "aws_eip" "nat_eip" {
   domain = "vpc"
   tags = {
     Name = "nat-eip"
   }
 }
-
 
 resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat_eip.id
@@ -59,14 +57,12 @@ resource "aws_nat_gateway" "nat_gw" {
   depends_on = [aws_internet_gateway.igw]
 }
 
-
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.my-vpc.id
   tags = {
     Name = "My-Internet-Gateway"
   }
 }
-
 
 resource "aws_route_table" "public_rtb" {
   vpc_id = aws_vpc.my-vpc.id
@@ -81,13 +77,11 @@ resource "aws_route_table" "public_rtb" {
   }
 }
 
-
 resource "aws_route_table_association" "public_rtb_association" {
   count          = length(var.public_cidr_block)
   subnet_id      = aws_subnet.public_subnet[count.index].id
   route_table_id = aws_route_table.public_rtb.id
 }
-
 
 resource "aws_route_table" "private_rtb" {
   vpc_id = aws_vpc.my-vpc.id
@@ -96,12 +90,10 @@ resource "aws_route_table" "private_rtb" {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat_gw.id
   }
-
   tags = {
     Name = "private-rtb"
   }
 }
-
 
 resource "aws_route_table_association" "private_rtb_association" {
   count          = length(var.private_cidr_block)
@@ -125,7 +117,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_port22_ipv4" {
   ip_protocol       = "tcp"
   to_port           = 22
 }
-
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
   security_group_id = aws_security_group.my-sg.id

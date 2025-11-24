@@ -43,9 +43,4 @@ module "eks-blueprints-addons" {
 
   enable_metrics_server        = true
   enable_kube_prometheus_stack = true
-
 }
-
-
-
-
